@@ -1,5 +1,6 @@
 package model;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class ProductRepo {
@@ -17,12 +18,16 @@ public class ProductRepo {
         this.allProducts = allProducts;
     }
 
-    public String addProduct (Product newProduct) {
-        return ("Successfully added: " + allProducts.put(newProduct.id(), newProduct));
+    public Product addProduct (Product newProduct) {
+        Product addedProduct = allProducts.put(newProduct.id(), newProduct);
+        System.out.println("Successfully added: " + newProduct);
+        return addedProduct;
     }
 
-    public String removeProduct (String id) {
-        return ( "Successfully removed: " + allProducts.remove(id) );
+    public Product removeProduct (String id) {
+        Product removedProduct = allProducts.remove(id);
+        System.out.println( "Successfully removed: " + removedProduct);
+        return removedProduct;
     }
 
     @Override
