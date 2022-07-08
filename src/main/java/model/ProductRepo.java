@@ -1,6 +1,5 @@
 package model;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class ProductRepo {
@@ -18,15 +17,15 @@ public class ProductRepo {
         this.allProducts = allProducts;
     }
 
-    public Product addProduct (Product newProduct) {
+    public Product addProduct(Product newProduct) {
         Product addedProduct = allProducts.put(newProduct.id(), newProduct);
         System.out.println("Successfully added: " + newProduct);
         return addedProduct;
     }
 
-    public Product removeProduct (String id) {
+    public Product removeProduct(String id) {
         Product removedProduct = allProducts.remove(id);
-        System.out.println( "Successfully removed: " + removedProduct);
+        System.out.println("Successfully removed: " + ((removedProduct != null) ? removedProduct : "NONE - ID not found!"));
         return removedProduct;
     }
 
