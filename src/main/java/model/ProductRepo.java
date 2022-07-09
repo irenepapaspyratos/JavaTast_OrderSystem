@@ -18,6 +18,10 @@ public class ProductRepo {
     }
 
     public Product addProduct(Product newProduct) {
+        if (allProducts.containsKey(newProduct.id())) {
+            System.out.println("Product-ID is already existing!");
+            return null;
+        }
         Product addedProduct = allProducts.put(newProduct.id(), newProduct);
         System.out.println("Successfully added: " + newProduct);
         return addedProduct;
