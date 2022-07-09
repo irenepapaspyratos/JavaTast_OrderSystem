@@ -11,6 +11,9 @@ public class ShopService {
     static Map<String, Order> allOrders = new HashMap<>();
     static OrderRepo orderMap = new OrderRepo(allOrders);
 
+    static Map<String, Integer> allItemsToOrder = new HashMap<>();
+    static ItemsToOrderList itemsToOrderMap = new ItemsToOrderList(allItemsToOrder);
+
 
     public static void main(String[] args) {
 
@@ -20,7 +23,7 @@ public class ShopService {
 
 
         switch (mainChoice) {
-            case 1:
+            case 1: // show all products
                 if (!allProducts.isEmpty()) {
                     System.out.println(productMap);
                 } else {
@@ -30,11 +33,11 @@ public class ShopService {
                 moreActionChoice = moreAction();
                 break;
 
-            case 2:
+            case 2: // edit list of products
                 int choiceProduct = chosenAction("product");
                 if (choiceProduct == 3) {
                     moreActionChoice = true;
-                } else if (editMap(choiceProduct, productMap, null, "product") == 3) {
+                } else if (editMap(choiceProduct, productMap, null, null, "product") == 3) {
                     moreActionChoice = true;
                 } else {
                     moreActionChoice = moreAction();
@@ -42,7 +45,7 @@ public class ShopService {
 
                 break;
 
-            case 3:
+            case 3: // show single product
                 if (!allProducts.isEmpty()) {
                     showProduct(allProducts);
                 } else {
@@ -52,7 +55,7 @@ public class ShopService {
                 moreActionChoice = moreAction();
                 break;
 
-            case 4:
+            case 4: // show all orders
                 if (!allOrders.isEmpty()) {
                     System.out.println(orderMap);
                 } else {
@@ -62,11 +65,11 @@ public class ShopService {
                 moreActionChoice = moreAction();
                 break;
 
-            case 5:
+            case 5: // edit list of orders
                 int choiceOrder = chosenAction("order");
                 if (choiceOrder == 3) {
                     moreActionChoice = true;
-                } else if (editMap(choiceOrder, null, orderMap, "order") == 3) {
+                } else if (editMap(choiceOrder, null, orderMap, null, "order") == 3) {
                     moreActionChoice = true;
                 } else {
                     moreActionChoice = moreAction();
@@ -74,7 +77,7 @@ public class ShopService {
 
                 break;
 
-            case 6:
+            case 6: // show single order
                 if (!allOrders.isEmpty()) {
                     showOrder(allOrders);
                 } else {
@@ -83,12 +86,30 @@ public class ShopService {
 
                 moreActionChoice = moreAction();
                 break;
-                
-            case 8:
+
+            case 7:
+                if (!allOrders.isEmpty()) {
+                    int choice = chosenAction("products in order");
+                    if (choice == 3) {
+                        moreActionChoice = true;
+                    } else if (editMap(choice, null, null, itemsToOrderMap, "productsInOrder") == 3) {
+                        moreActionChoice = true;
+                    } else {
+                        moreActionChoice = moreAction();
+                    }
+                } else {
+                    System.out.println("Your order list is empty.");
+                }
+
+                moreActionChoice = moreAction();
+                break;
+
+            case 8: // quit
                 System.out.println("You left the program.");
 
                 moreActionChoice = false;
                 break;
+
             default:
                 System.out.println("Your choice does not match one of the given options.");
                 chosenMainAction();
@@ -99,6 +120,7 @@ public class ShopService {
         if (moreActionChoice) main(null);
 
     }
+
 
     public static boolean moreAction() {
         Scanner terminalScanner = new Scanner(System.in);
@@ -157,15 +179,23 @@ public class ShopService {
         return Integer.parseInt(actionChoice);
     }
 
-    private static int editMap(int chosenAction, ProductRepo mapP, OrderRepo mapO, String typeOf) {
+    private static int editMap(int chosenAction, ProductRepo mapP, OrderRepo mapO, ItemsToOrderList mapI, String typeOf) {
 
         Product returnValueP = null;
         Order returnValueO = null;
+        ItemsToOrderList returnValueI = null;
+
+        if (typeOf.equals("productsInOrder")) {
+            returnValueI = editOrder(chosenAction, mapI);
+            return returnValueO == null ? 3 : 0;
+        }
+
         switch (chosenAction) {
             case 1:
                 if (typeOf.equals("product")) returnValueP = createProduct(mapP);
                 if (typeOf.equals("order")) returnValueO = createOrder(mapO);
                 break;
+
             case 2:
                 if (typeOf.equals("product")) {
                     returnValueP = deleteProduct(mapP);
@@ -387,6 +417,10 @@ public class ShopService {
             }
         }
         return deletedOrder;
+    }
+
+    private static ItemsToOrderList editOrder(int chosenAction, ItemsToOrderList mapI) {
+        return null;
     }
 
 
