@@ -24,8 +24,12 @@ public class ProductRepo {
     }
 
     public Product removeProduct(String id) {
+        if (!allProducts.containsKey(id)) {
+            System.out.println("Product-ID not found!");
+            return null;
+        }
         Product removedProduct = allProducts.remove(id);
-        System.out.println("Successfully removed: " + ((removedProduct != null) ? removedProduct : "NONE - ID not found!"));
+        System.out.println("Successfully removed: " + removedProduct);
         return removedProduct;
     }
 
