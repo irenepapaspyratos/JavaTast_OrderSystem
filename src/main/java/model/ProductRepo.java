@@ -24,7 +24,7 @@ public class ProductRepo {
         }
         Product addedProduct = allProducts.put(newProduct.id(), newProduct);
         System.out.println("Successfully added: " + newProduct);
-        return addedProduct;
+        return addedProduct == null ? newProduct : null;
     }
 
     public Product removeProduct(String id) {
