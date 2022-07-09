@@ -6,6 +6,7 @@ public class OrderRepo {
     private Map<String, Order> allOrders;
 
     public OrderRepo(Map<String, Order> allOrders) {
+
         this.allOrders = allOrders;
     }
 
@@ -17,12 +18,24 @@ public class OrderRepo {
         this.allOrders = allOrders;
     }
 
-    public String addOrder (Order newOrder) {
-        return ("Successfully added: " + allOrders.put(newOrder.id(), newOrder));
+    public Order addOrder(Order newOrder) {
+        if (allOrders.containsKey(newOrder.id())) {
+            System.out.println("Order-ID is already existing!");
+            return null;
+        }
+        Order addedOrder = allOrders.put(newOrder.id(), newOrder);
+        System.out.println("Successfully added: " + newOrder);
+        return addedOrder == null ? newOrder : null;
     }
 
-     public String removeOrder (String id) {
-        return ( "Successfully removed: " + allOrders.remove(id) );
+    public Order removeOrder(String id) {
+        if (!allOrders.containsKey(id)) {
+            System.out.println("Order-ID not found!");
+            return null;
+        }
+        Order removedOrder = allOrders.remove(id);
+        System.out.println("Successfully removed: " + removedOrder);
+        return removedOrder;
     }
 
     @Override

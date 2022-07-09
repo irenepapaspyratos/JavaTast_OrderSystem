@@ -1,26 +1,23 @@
-import model.Order;
-import model.OrderRepo;
-import model.Product;
-import model.ProductRepo;
+import model.*;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
 public class ShopService {
+    static Map<String, Product> allProducts = new HashMap<>();
+    static ProductRepo productMap = new ProductRepo(allProducts);
+
+    static Map<String, Order> allOrders = new HashMap<>();
+    static OrderRepo orderMap = new OrderRepo(allOrders);
+
 
     public static void main(String[] args) {
 
-        Map<String, Product> allProducts = new HashMap<>();
-        ProductRepo productMap = new ProductRepo(allProducts);
-
-        Map<String, Order> allOrders = new HashMap<>();
-        OrderRepo orderMap = new OrderRepo(allOrders);
-
         boolean moreActionChoice = false;
 
-
         int mainChoice = chosenMainAction();
+
 
         switch (mainChoice) {
             case 1:
@@ -32,17 +29,19 @@ public class ShopService {
 
                 moreActionChoice = moreAction();
                 break;
+
             case 2:
-                int productChoice = chosenProductAction();
-                if (productChoice == 3) {
+                int choiceProduct = chosenAction("product");
+                if (choiceProduct == 3) {
                     moreActionChoice = true;
-                } else if (editProductMap(productChoice, productMap) == 3) {
+                } else if (editMap(choiceProduct, productMap, null, "product") == 3) {
                     moreActionChoice = true;
                 } else {
                     moreActionChoice = moreAction();
                 }
 
                 break;
+
             case 3:
                 if (!allProducts.isEmpty()) {
                     showProduct(allProducts);
@@ -52,6 +51,7 @@ public class ShopService {
 
                 moreActionChoice = moreAction();
                 break;
+
             case 4:
                 if (!allOrders.isEmpty()) {
                     System.out.println(orderMap);
@@ -61,6 +61,19 @@ public class ShopService {
 
                 moreActionChoice = moreAction();
                 break;
+
+            case 5:
+                int choiceOrder = chosenAction("order");
+                if (choiceOrder == 3) {
+                    moreActionChoice = true;
+                } else if (editMap(choiceOrder, null, orderMap, "order") == 3) {
+                    moreActionChoice = true;
+                } else {
+                    moreActionChoice = moreAction();
+                }
+
+                break;
+
             case 6:
                 if (!allOrders.isEmpty()) {
                     showOrder(allOrders);
@@ -70,9 +83,15 @@ public class ShopService {
 
                 moreActionChoice = moreAction();
                 break;
+                
             case 8:
                 System.out.println("You left the program.");
+
                 moreActionChoice = false;
+                break;
+            default:
+                System.out.println("Your choice does not match one of the given options.");
+                chosenMainAction();
                 break;
         }
 
@@ -115,32 +134,88 @@ public class ShopService {
                 "Your choice: ");
         String actionChoice = terminalScanner.nextLine();
 
-        while (!actionChoice.matches("[1-8]")) {
+        if (actionChoice.equals("0")) actionChoice = "666";
+        if (actionChoice.matches("[1-8]")) System.out.println("You selected option " + actionChoice + " - Let's go!");
+        return Integer.parseInt(actionChoice);
+    }
+
+    public static int chosenAction(String typeOf) {
+        Scanner terminalScanner = new Scanner(System.in);
+        System.out.println("What would you like to do? \n" +
+                "1 = Add " + typeOf + " \n" +
+                "2 = Delete " + typeOf + " \n" +
+                "3 = Back to Start \n" +
+                "Your Choice: ");
+        String actionChoice = terminalScanner.nextLine();
+
+        while (!actionChoice.matches("[1-3]")) {
             System.out.println("Your choice does not match one of the given options.");
-            chosenMainAction();
+            chosenAction(typeOf);
         }
 
         System.out.println("You selected option " + actionChoice + " - Let's go!");
         return Integer.parseInt(actionChoice);
     }
 
-    public static int chosenProductAction() {
-        Scanner terminalScanner = new Scanner(System.in);
-        System.out.println("What would you like to do? \n" +
-                "1 = Add a product \n" +
-                "2 = Delete a product \n" +
-                "3 = Back to Start \n" +
-                "Your Choice: ");
-        String productActionChoice = terminalScanner.nextLine();
+    private static int editMap(int chosenAction, ProductRepo mapP, OrderRepo mapO, String typeOf) {
 
-        while (!productActionChoice.matches("[1-3]")) {
-            System.out.println("Your choice does not match one of the given options.");
-            chosenProductAction();
+        Product returnValueP = null;
+        Order returnValueO = null;
+        switch (chosenAction) {
+            case 1:
+                if (typeOf.equals("product")) returnValueP = createProduct(mapP);
+                if (typeOf.equals("order")) returnValueO = createOrder(mapO);
+                break;
+            case 2:
+                if (typeOf.equals("product")) {
+                    returnValueP = deleteProduct(mapP);
+                }
+                if (typeOf.equals("order")) {
+                    returnValueO = deleteOrder(mapO);
+                }
+                break;
         }
 
-        System.out.println("You selected option " + productActionChoice + " - Let's go!");
-        return Integer.parseInt(productActionChoice);
+        if (typeOf.equals("product")) return returnValueP == null ? 3 : 0;
+        if (typeOf.equals("order")) return returnValueO == null ? 3 : 0;
+        return 3;
     }
+
+    public static String generateId(ProductRepo mapP, OrderRepo mapO, String typeOf) {
+        // can certainly be improved
+        String id;
+        Map getAll = null;
+        if (typeOf.equals("product")) {
+            getAll = mapP.getAllProducts();
+        } else if (typeOf.equals("order")) {
+            getAll = mapO.getAllOrders();
+        }
+
+        int addition = getAll.size();
+        id = "" + addition;
+
+        while (id.equals("0") || getAll.containsKey(id)) {
+            id = "" + (Integer.parseInt(id) + 1);
+        }
+
+        return id;
+    }
+
+    public static String manualId() {
+        Scanner terminalScanner = new Scanner(System.in);
+        System.out.println("The id of your new item must be: \n" +
+                "not empty, not 0, not already existing. \n" +
+                "Enter your id or quit with 0: ");
+        String id = terminalScanner.nextLine();
+
+        while (id.equals(" ") || id.equals("")) {
+            System.out.println("Given id does not match the criteria - try again: ");
+            id = terminalScanner.nextLine();
+        }
+
+        return id;
+    }
+
 
     public static void showProduct(Map<String, Product> allProducts) {
         Scanner terminalScanner = new Scanner(System.in);
@@ -157,23 +232,8 @@ public class ShopService {
                 System.out.println("Given id does not exist. \nTry again? y(yes) / n(no)");
                 tryAgain = terminalScanner.nextLine();
             }
-            if (!tryAgain.matches("(?i)(y|yes)")) showProduct(allProducts);
+            if (tryAgain.matches("(?i)(y|yes)")) showProduct(allProducts);
         }
-    }
-
-    private static int editProductMap(int productChoice, ProductRepo productMap) {
-
-        Product returnValue = null;
-        switch (productChoice) {
-            case 1:
-                returnValue = createProduct(productMap);
-                break;
-            case 2:
-                returnValue = deleteProduct(productMap);
-                break;
-        }
-
-        return returnValue == null ? 3 : 0;
     }
 
     public static Product createProduct(ProductRepo productMap) {
@@ -199,23 +259,22 @@ public class ShopService {
         int productIdChoice = Integer.parseInt(productCreateChoice);
 
         if (productIdChoice == 1) {
-            System.out.println("The id of your new product must be: \n" +
-                    "not empty, not 0, not already existing. \n" +
-                    "Enter your id: ");
-            String productId = terminalScanner.nextLine();
+
+            String productId = manualId();
+            if (productId.equals("0")) return null;
 
             Product newProduct = new Product(productId, productName);
             Product addedProduct = productMap.addProduct(newProduct);
-            while (addedProduct == null || productId.equals("0") || productId.equals(" ") || productId.equals("")) {
-                System.out.println("Product id does not match the criteria - try again: ");
-                productId = terminalScanner.nextLine();
+
+            while (addedProduct == null) {
+                productId = manualId();
                 newProduct = new Product(productId, productName);
                 addedProduct = productMap.addProduct(newProduct);
             }
 
             return addedProduct;
         } else if (productIdChoice == 2) {
-            String productId = generateProductId(productMap);
+            String productId = generateId(productMap, null, "product");
             Product newProduct = new Product(productId, productName);
 
             return productMap.addProduct(newProduct);
@@ -238,26 +297,97 @@ public class ShopService {
                 idToDelete = terminalScanner.nextLine();
                 deletedProduct = productMap.removeProduct(idToDelete);
             } else {
-                return deletedProduct;
+                return null;
             }
         }
         return deletedProduct;
     }
 
-    public static String generateProductId(ProductRepo productMap) {
-        // can certainly be improved
-        String productId = "" + productMap.getAllProducts().size();
-        while (productId.matches("0") || productMap.getAllProducts().containsKey(productId)) {
-            productId = "" + (Integer.parseInt(productId) + 1);
-        }
-        return productId;
-    }
 
     public static void showOrder(Map<String, Order> allOrders) {
         Scanner terminalScanner = new Scanner(System.in);
-        System.out.println("Enter the id of the product to display: ");
-        String oderId = terminalScanner.nextLine();
-        Order order = allOrders.get(oderId);
+        System.out.println("Enter the id of the order to display: ");
+        String orderId = terminalScanner.nextLine();
+        Order order = allOrders.get(orderId);
+        if (order != null) {
+            System.out.println(order);
+        } else {
+            System.out.println("Given id does not exist. \nTry again? y(yes) / n(no)");
+            String tryAgain = terminalScanner.nextLine();
+            while (!tryAgain.matches("(?i)(y|yes|n|no)")) {
+                System.out.println("Your choice does not match the options.");
+                System.out.println("Given id does not exist. \nTry again? y(yes) / n(no)");
+                tryAgain = terminalScanner.nextLine();
+            }
+            if (tryAgain.matches("(?i)(y|yes)")) showOrder(allOrders);
+        }
     }
+
+    public static Order createOrder(OrderRepo orderMap) {
+        Scanner terminalScanner = new Scanner(System.in);
+        System.out.println("What would you like to do? \n" +
+                "1 = Enter your order id manually \n" +
+                "2 = Let a order id be generated automatically \n" +
+                "3 = Back to Start \n" +
+                "Your Choice: ");
+        String orderCreateChoice = terminalScanner.nextLine();
+
+        while (!orderCreateChoice.matches("[1-3]")) {
+            System.out.println("Your choice does not match one of the given options.");
+            System.out.println("What would you like to do? \n" +
+                    "1 = Enter your order id manually \n" +
+                    "2 = Let a order id be generated automatically \n" +
+                    "3 = Back to Start \n" +
+                    "Your Choice: ");
+            orderCreateChoice = terminalScanner.nextLine();
+        }
+        int orderIdChoice = Integer.parseInt(orderCreateChoice);
+
+        Map<String, Integer> newOrderList = new HashMap<>();
+        if (orderIdChoice == 1) {
+
+            String orderId = manualId();
+            if (orderId.equals("0")) return null;
+
+            Order newOrder = new Order(orderId, newOrderList);
+            Order addedOrder = orderMap.addOrder(newOrder);
+
+            while (addedOrder == null) {
+                orderId = manualId();
+                newOrder = new Order(orderId, newOrderList);
+                addedOrder = orderMap.addOrder(newOrder);
+            }
+
+            return addedOrder;
+        } else if (orderIdChoice == 2) {
+            String orderId = generateId(null, orderMap, "order");
+            Order newOrder = new Order(orderId, newOrderList);
+
+            return orderMap.addOrder(newOrder);
+        }
+
+        return null;
+    }
+
+    public static Order deleteOrder(OrderRepo orderMap) {
+        Scanner terminalScanner = new Scanner(System.in);
+        System.out.println("Enter the id of the order to remove: ");
+        String idToDelete = terminalScanner.nextLine();
+        Order deletedOrder = orderMap.removeOrder(idToDelete);
+
+        while (deletedOrder == null) {
+            System.out.println("Given id does not exist. \nTry again? y(yes) / n(no)");
+            String tryAgain = terminalScanner.nextLine();
+            if (tryAgain.matches("(?i)(y|yes)")) {
+                System.out.println("Enter the id of the order to remove: ");
+                idToDelete = terminalScanner.nextLine();
+                deletedOrder = orderMap.removeOrder(idToDelete);
+            } else {
+                return null;
+            }
+        }
+        return deletedOrder;
+    }
+
 
 }
